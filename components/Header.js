@@ -4,8 +4,9 @@ import {
     useChainModal,
 } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi'
-import { FaTwitter, FaGithub, FaYoutube, FaGoogleDrive } from "react-icons/fa";
+import { FaTwitter, FaGithub, FaYoutube } from "react-icons/fa";
 import styles from '../styles/Home.module.css';
+import Image from 'next/image'
 
 export default function Header() {
     const { openConnectModal } = useConnectModal();
@@ -15,13 +16,13 @@ export default function Header() {
     const { address, isConnected } = useAccount();
 
     return (
-        <div className="navbar text-neutral-content bg-primary-content">
-            <div className="flex-1 ml-3 text-gray-50">
+        <div className="navbar text-neutral-content border-solid border-b-2 bg-slate-300">
+            <div className="flex-1 ml-3">
                 <ul className='flex flex-row justify-between gap-6'>
-                    <li><a href="#"><FaGoogleDrive size="2rem" /></a></li>
-                    <li><a className={styles.leftToRight} href="https://twitter.com/coffiasd"><FaTwitter size="1rem" className='m-0.5' />TWITTER</a></li>
-                    <li><a className={styles.leftToRight} href="https://github.com/coffiasd"><FaGithub size="1rem" className='m-0.5' />GITHUB</a></li>
-                    <li><a className={styles.leftToRight} href="#"><FaYoutube size="1rem" className='m-0.5' />YOUTUBE</a></li>
+                    <li><a className={styles.logo} href="#"><Image src="/hyperlane-logo-2.svg" width={80} height={20} /></a></li>
+                    <li><a className={styles.leftToRight} href="https://twitter.com/coffiasd"><FaTwitter size="1.2rem" className='m-0.5' />TWITTER</a></li>
+                    <li><a className={styles.leftToRight} href="https://github.com/coffiasd"><FaGithub size="1.2rem" className='m-0.5' />GITHUB</a></li>
+                    <li><a className={styles.leftToRight} href="#"><FaYoutube size="1.3rem" className='m-0.5' />YOUTUBE</a></li>
                 </ul>
             </div>
 

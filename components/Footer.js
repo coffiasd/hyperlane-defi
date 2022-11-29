@@ -2,7 +2,7 @@ import styles from '../styles/Home.module.css';
 
 export default function Footer() {
     return (
-        <footer className="footer p-10 bg-base-300 text-base-content">
+        <footer className="footer p-10 bg-slate-300 text-base-content">
             <div>
                 <span className="footer-title text-black">Services</span>
                 <a className={styles.footerHover}>BRAND</a>
