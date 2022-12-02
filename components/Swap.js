@@ -93,8 +93,8 @@ export default function Swap() {
 
     // get token0 and token1 exchange rate.
     async function getTokenExRate() {
-        console.log(token0, token1);
-        if (!token0 || !token1) {
+        console.log("getTokenExRate", token0, token1);
+        if (token0 == null || token1 == null) {
             return
         }
 
@@ -141,7 +141,11 @@ export default function Swap() {
     async function selectToken0ChangeHandle(index) {
         myModal5ClickHandle();
         if (index == token1) {
+            //exchange
             setToken1(token0);
+            let temp = token0Balance;
+            setToken0Balance(token1Balance);
+            setToken1Balance(temp);
         }
         setToken0(index);
         // getTokenExRate();
@@ -152,7 +156,11 @@ export default function Swap() {
     async function selectToken1ChangeHandle(index) {
         myModal6ClickHandle();
         if (index == token0) {
+            //exchange
             setToken0(token1);
+            let temp = token0Balance;
+            setToken0Balance(token1Balance);
+            setToken1Balance(temp);
         }
         setToken1(index);
         // getTokenExRate();
@@ -346,7 +354,7 @@ export default function Swap() {
                     <div className="divider"></div>
                     <div className="flex flex-col">
                         {networkConfig.map((item, key) => (
-                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" onClick={() => networkChange(key)}>
+                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" key={key} onClick={() => networkChange(key)}>
                                 <div className="w-1/12 align-middle">
                                     <Image src={item.path} width={25} height={25} />
                                 </div>
@@ -368,7 +376,7 @@ export default function Swap() {
                     <div className="divider"></div>
                     <div className="flex flex-col">
                         {tokenlist.map((item, key) => (
-                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" onClick={() => selectToken0ChangeHandle(key)}>
+                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" key={key} onClick={() => selectToken0ChangeHandle(key)}>
                                 <div className="w-1/12 align-middle">
                                     <Image src={item.path} width={25} height={25} />
                                 </div>
@@ -390,7 +398,7 @@ export default function Swap() {
                     <div className="divider"></div>
                     <div className="flex flex-col">
                         {tokenlist.map((item, key) => (
-                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" onClick={() => selectToken1ChangeHandle(key)}>
+                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" key={key} onClick={() => selectToken1ChangeHandle(key)}>
                                 <div className="w-1/12 align-middle">
                                     <Image src={item.path} width={25} height={25} />
                                 </div>
