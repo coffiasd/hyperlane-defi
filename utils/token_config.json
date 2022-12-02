@@ -4,13 +4,15 @@
       "address": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
       "decimals": 18,
       "symbol": "WETH",
-      "name": "Wrapped Ether"
+      "name": "Wrapped Ether",
+      "path": "/public/token/ethereum.svg"
     },
     {
       "address": "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C",
       "decimals": 6,
       "symbol": "USDC",
-      "name": "USDC"
+      "name": "USDC",
+      "path": "/public/token/usdc.svg"
     }
   ],
   "80001": [
@@ -18,13 +20,15 @@
       "address": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
       "decimals": 18,
       "symbol": "WMATIC",
-      "name": "Wrapped Matic"
+      "name": "Wrapped Matic",
+      "path": "/public/token/matic.svg"
     },
     {
       "address": "0x000080383847bD75F91c168269Aa74004877592f",
       "decimals": 18,
       "symbol": "ZETA",
-      "name": "Zeta"
+      "name": "Zeta",
+      "path": "/public/token/zeta.png"
     }
   ]
 }

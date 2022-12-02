@@ -11,7 +11,25 @@ import {
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 
-const { chains, provider } = configureChains([chain.polygonMumbai, chain.goerli, chain.polygon, chain.localhost], [publicProvider()])
+const bssctestChain = {
+  id: 97,
+  name: 'BSC Testnet',
+  network: 'BSC Testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'tBNB',
+    symbol: 'tBNB',
+  },
+  rpcUrls: {
+    default: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+  },
+  blockExplorers: {
+    default: { name: 'SnowTrace', url: 'https://testnet.bscscan.com' },
+  },
+  testnet: true,
+}
+
+const { chains, provider } = configureChains([bssctestChain, chain.polygonMumbai, chain.goerli, chain.localhost], [publicProvider()])
 
 const { connectors } = getDefaultWallets({
   appName: 'My RainbowKit App',
@@ -23,6 +41,8 @@ const client = createClient({
   connectors,
   provider,
 })
+
+// switchNetwork(bssctestChain);
 
 function MyApp({ Component, pageProps }) {
   return (

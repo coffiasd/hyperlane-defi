@@ -1,4 +1,5 @@
 import { BiSortAlt2, BiCog } from "react-icons/bi";
+import { FaAngleDown, FaEthereum } from "react-icons/fa";
 import { Pool, Position, nearestUsableTick, getPool } from '@uniswap/v3-sdk'
 import { ethers } from 'ethers'
 import { Percent, Token, CurrencyAmount } from '@uniswap/sdk-core'
@@ -12,9 +13,17 @@ import { useEffect, useState } from "react";
 import { FetchPrice } from "../utils/common";
 import HyperABI from '../contract/artifacts/contracts/Hyperswap.sol/Hyperswap.json';
 //wagmi hooks
-import { useAccount, useNetwork, erc20ABI } from 'wagmi'
+import { useAccount, useNetwork, erc20ABI, useSwitchNetwork } from 'wagmi'
+//alert
+import { alertService } from '../services';
+import styles from '../styles/Home.module.css';
+import Image from "next/image";
+
 
 export default function Swap() {
+
+    const { switchNetwork } = useSwitchNetwork();
+
     const [rpc, setRpc] = useState(networkConfig[0].rpc);
     const [tokenlist, setTokenlist] = useState(tokensConfig[networkConfig[0].value]);
 
@@ -26,6 +35,14 @@ export default function Swap() {
 
     // pool fee 
     const [fee, setFee] = useState(500);
+
+    //button loading
+    const [loading, setLoading] = useState("");
+
+    // modal
+    const [modal, setModal] = useState("");
+    const [modalNetwork, setModalNetwork] = useState("");
+    const [modalToken, setmodalToken] = useState("");
 
     //token option
     const [token0, setToken0] = useState(null);
@@ -44,9 +61,6 @@ export default function Swap() {
 
     const provider = new ethers.providers.JsonRpcProvider(rpc);
 
-    //deploy address: 0xA4BCB4bB1516C0F62A6CC7a60e2F6fAfd9821BD2
-    //inter chain account: 0x3C951DEE860c6Da62B9D0A719B829Ed3825D1c34
-
     //hyper address
     const hypercontractaddress = "0xA4BCB4bB1516C0F62A6CC7a60e2F6fAfd9821BD2";
     //inter chain account address
@@ -63,6 +77,11 @@ export default function Swap() {
     const { isConnected } = useAccount();
     const { chain } = useNetwork();
 
+    //alert options
+    const options = {
+        autoClose: true,
+        keepAfterRouteChange: false
+    }
 
     // get uniswap V3 pool address 
     async function getPoolAddress(token0, token1) {
@@ -78,6 +97,11 @@ export default function Swap() {
             return
         }
 
+        setLoading("loading");
+        setTimeout(() => {
+            setLoading("");
+        }, 12000);
+
         let token0Info = tokensConfig[networkConfig[currentNetwork].value][token0];
         let token1Info = tokensConfig[networkConfig[currentNetwork].value][token1];
         let pool = await getPoolAddress(token0Info.address, token1Info.address);
@@ -85,8 +109,9 @@ export default function Swap() {
         console.log("fee:", await poolContract.fee());
         setFee(await poolContract.fee());
         let tokenPrice = await FetchPrice(token0Info, token1Info, poolContract, networkConfig[currentNetwork].value);
-        console.log("=================rate================", tokenPrice);
-        setRate(tokenPrice);
+        console.log("=================rate================", Number(tokenPrice));
+        setRate(Number(tokenPrice));
+        setLoading("");
     }
 
     //get balance
@@ -108,8 +133,6 @@ export default function Swap() {
         console.log("allowance================", networkConfig[currentNetwork].value, token0Info.address);
         let allowance = await erc20.allowance(interchainAccount, uniswapRouterAddress);
         console.log(token0);
-        // return Number(allowance._hex);
-        console.log("allowance:", Number(allowance._hex));
         setAllowance(Number(allowance._hex));
     }
 
@@ -139,15 +162,16 @@ export default function Swap() {
         setToken0Input(e.target.value);
         //set estimate token1
         if (token1 && rate > 0 && e.target.value > 0) {
-            setToken1Input(e.target.value / rate);
+            setToken1Input(e.target.value * rate);
         }
+        getAllowance();
     }
 
     function token1InputHandle(e) {
         setToken1Input(e.target.value);
         //set estimate token0
-        if (token0 && rate > 0 && e.target.value > 0) {
-            setToken0Input(e.target.value * rate);
+        if (token1 && token0 && rate > 0) {
+            setToken1Input(token0Input * rate);
         }
     }
 
@@ -155,38 +179,71 @@ export default function Swap() {
     async function approve() {
         console.log("==================approve================");
         if (!isConnected) {
-            alert("please connect wallet!!");
+            alertService.info("connect wallet!!", options);
             return;
         }
-        if (chain.id != 80001) {
-            alert("please use mumbai net!!");
+        if (chain.id != 97) {
+            alertService.info("use bsc testnet!!", options);
+            switchNetwork(97);
             return;
         }
-
+        setLoading("loading");
+        setTimeout(() => {
+            setLoading("");
+        }, 12000);
         const m = await connectedContract.ApproveSpecifyToken(networkConfig[currentNetwork].value, tokensConfig[networkConfig[currentNetwork].value][token0].address, ethers.utils.parseEther(token0Input), {
             gasLimit: ethers.utils.hexlify(0x100000), //100000
         });
         console.log(m);
-
+        setLoading("");
     }
 
     async function swap() {
         console.log("=================swap===================");
         if (!isConnected) {
-            alert("please connect wallet!!");
+            alertService.info("connect wallet!!", options);
             return;
         }
 
-        if (chain.id != 80001) {
-            alert("please use mumbai net!!");
+        if (chain.id != 97) {
+            alertService.info("use bsc testnet!!", options);
+            switchNetwork(97);
             return;
         }
-        console.log("swap:", token0Input);
-
-        const m = await connectedContract.HyperlaneSwap(networkConfig[currentNetwork].value, [tokensConfig[networkConfig[currentNetwork].value][token0].address, tokensConfig[networkConfig[currentNetwork].value][token1].address], fee, ethers.utils.parseEther('0.00001'), 0, {
+        setLoading("loading");
+        setTimeout(() => {
+            setLoading("");
+        }, 12000);
+        const m = await connectedContract.HyperlaneSwap(networkConfig[currentNetwork].value, [tokensConfig[networkConfig[currentNetwork].value][token0].address, tokensConfig[networkConfig[currentNetwork].value][token1].address], fee, ethers.utils.parseEther(token0Input), 0, {
             gasLimit: ethers.utils.hexlify(0x100000), //100000
         });
+        setToken0Input(0);
+        setToken1Input(0);
         console.log(m);
+        setLoading("");
+        setModal("modal-open");
+    }
+
+    /// control modal
+    const modalClick = () => {
+        if (modal == "") {
+            setModal("modal-open");
+        } else {
+            setModal("");
+        }
+    }
+
+    const myModal4ClickHandle = () => {
+        if (modalNetwork == "") {
+            setModalNetwork("modal-open");
+        } else {
+            setModalNetwork("");
+        }
+    }
+
+    const openTarget = () => {
+        modalClick();
+        window.open("https://explorer.hyperlane.xyz/?search=0x14d3bb3aaf175f922f11f2694868c3fad58824e1")
     }
 
     function buttonHtml() {
@@ -196,19 +253,20 @@ export default function Swap() {
 
         //check allowance.
         if (token0Input > allowance) {
-            return <button className="btn btn-primary w-full normal-case my-5 rounded-xl" onClick={approve}>Approve</button>
+            return <button className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`} onClick={approve} >Approve</button >
         }
 
         if (token1Input > 0 && token0Input > 0 && token1Input && token0 && token1) {
-            return <button className="btn btn-primary w-full normal-case my-5 rounded-xl" onClick={swap}>Swap</button>
+            return <button className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`} onClick={swap}>Swap</button>
         }
 
-        return <button className="btn btn-primary w-full normal-case my-5 rounded-xl">Enter an amount</button>
+        return <button className="btn btn-primary w-full normal-case my-5 rounded-xl" disabled>Enter an amount</button>
     }
 
     //switch network
-    const networkChange = (e) => {
-        let netKey = e.target.value;
+    const networkChange = (netKey) => {
+        myModal4ClickHandle();
+        // let netKey = e.target.value;
         let ChainId = networkConfig[netKey].value;
         setRpc(networkConfig[netKey].rpc);
         console.log("=============switch network===========", networkConfig[netKey].rpc);
@@ -228,15 +286,15 @@ export default function Swap() {
         const fetchToken0Balance = async () => {
             let token0Info = tokensConfig[networkConfig[currentNetwork].value][token0];
             let token0Balance = await getERC20Balance(token0Info.address);
-            console.log(ethers.utils.formatUnits(token0Balance, 18));
-            setToken0Balance(ethers.utils.formatUnits(token0Balance, 18));
+            console.log(ethers.utils.formatUnits(String(token0Balance), token0Info.decimals));
+            setToken0Balance(ethers.utils.formatUnits(String(token0Balance), token0Info.decimals));
         }
 
         const fetchToken1Balance = async () => {
             let token1Info = tokensConfig[networkConfig[currentNetwork].value][token1];
             let token1Balance = await getERC20Balance(token1Info.address);
-            console.log(ethers.utils.formatUnits(token1Balance, 18));
-            setToken1Balance(ethers.utils.formatUnits(token1Balance, 18));
+            console.log(ethers.utils.formatUnits(String(token1Balance), token1Info.decimals));
+            setToken1Balance(ethers.utils.formatUnits(String(token1Balance), token1Info.decimals));
         }
 
         if (token0) {
@@ -254,7 +312,40 @@ export default function Swap() {
     return (
         <div className="">
 
-            <div className="w-32 mx-auto mt-40">
+            <div className={`modal ${modal}`} id="my-modal-2">
+                <div className="modal-box">
+                    <h3 className="font-bold text-lg">congrats!!</h3>
+                    <p className="py-4">Remote chain swap transaction is created</p>
+                    <div className="modal-action">
+                        <a href="#" className="btn" onClick={() => modalClick()}>Okay</a>
+                        <a href="#" className="btn" onClick={openTarget}>Detail Explorer</a>
+                    </div>
+                </div>
+            </div>
+
+            <div className={`modal ${modalNetwork} cursor-pointer ${styles.modalSelf}`} id="my-modal-4">
+                <div className="modal-box">
+                    <h3 className="text-lg font-bold">Select Network</h3>
+                    <div className="divider"></div>
+                    <div className="flex flex-col">
+                        {networkConfig.map((item, key) => (
+                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" onClick={() => networkChange(key)}>
+                                <div className="w-1/12 align-middle">
+                                    <Image src={item.path} width={25} height={25} />
+                                </div>
+                                <div className="w-9/12 mb-4">
+                                    <div>{item.label}</div>
+                                </div>
+                                <div className="w-2/12">
+                                    -
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* <div className="w-32 mx-auto mt-40">
                 <select className="select w-full max-w-xs rounded-2xl select-primary bg-slate-50" onChange={networkChange}>
 
                     {networkConfig.map((item, key) => (
@@ -262,13 +353,20 @@ export default function Swap() {
                     ))}
 
                 </select>
-            </div>
+            </div> */}
 
+            <div className="w-36 m-auto" onClick={myModal4ClickHandle}>
+                <div className="w-36 mx-auto mt-40 flex flex-row border-solid border-2 rounded-2xl p-2 cursor-pointer">
+                    <div className="m-1"><Image src={networkConfig[currentNetwork].path} width={20} height={20} /></div>
+                    <div className="ml-2 mt-0.5">{networkConfig[currentNetwork].label}</div>
+                    <div className="ml-2 mt-1 float-right"><FaAngleDown size="1.3rem" /></div>
+                </div>
+            </div>
             <div className="w-1/4 min-w-max h-auto mt-10 border-solid border-2 rounded-2xl m-auto p-1 font-mono text-sm bg-slate-50">
 
                 <div className="w-full px-6 py-4">
                     <span className="font-black">
-                        UniSwap V3
+                        Hyperlane Swap
                     </span>
                     <BiCog className="cursor-pointer float-right" size="1.5rem" />
                 </div>

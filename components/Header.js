@@ -16,7 +16,7 @@ export default function Header() {
     const { address, isConnected } = useAccount();
 
     return (
-        <div className="navbar text-neutral-content border-solid border-b-2 bg-slate-300">
+        <div className="navbar text-neutral-content border-solid border-b-2 bg-base-content">
             <div className="flex-1 ml-3">
                 <ul className='flex flex-row justify-between gap-6'>
                     <li><a className={styles.logo} href="#"><Image src="/hyperlane-logo-2.svg" width={80} height={20} /></a></li>
@@ -28,9 +28,9 @@ export default function Header() {
 
             <div className="navbar-end">
                 {isConnected ?
-                    (<><button className="btn btn-sm btn-info ml-3 normal-case" onClick={openAccountModal}>Profile</button><button className="btn btn-sm btn-error ml-3 normal-case " onClick={openChainModal}>Chain</button></>)
+                    (<><button className="btn btn-sm btn-primary ml-3 normal-case" onClick={openAccountModal}>Profile</button><button className="btn btn-sm btn-info ml-3 normal-case " onClick={openChainModal}>Chain</button></>)
                     :
-                    (<button className="btn btn-sm btn-error ml-3 normal-case" onClick={openConnectModal}>connect wallet</button>)
+                    (<button className="btn btn-sm btn-warning ml-3 normal-case" onClick={openConnectModal}>connect wallet</button>)
                 }
             </div>
         </div >
