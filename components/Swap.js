@@ -42,7 +42,8 @@ export default function Swap() {
     // modal
     const [modal, setModal] = useState("");
     const [modalNetwork, setModalNetwork] = useState("");
-    const [modalToken, setmodalToken] = useState("");
+    const [modalToken, setModalToken] = useState("");
+    const [modalToken1, setModalToken1] = useState("");
 
     //token option
     const [token0, setToken0] = useState(null);
@@ -137,23 +138,23 @@ export default function Swap() {
     }
 
     //token0 change event.
-    async function selectToken0ChangeHandle(e) {
-        let value = e.target.options[e.target.options.selectedIndex].getAttribute('data-key');
-        if (value == token1) {
+    async function selectToken0ChangeHandle(index) {
+        myModal5ClickHandle();
+        if (index == token1) {
             setToken1(token0);
         }
-        setToken0(value);
+        setToken0(index);
         // getTokenExRate();
         await getAllowance();
     }
 
     //token1 change event.
-    async function selectToken1ChangeHandle(e) {
-        let value = e.target.options[e.target.options.selectedIndex].getAttribute('data-key');
-        if (value == token0) {
+    async function selectToken1ChangeHandle(index) {
+        myModal6ClickHandle();
+        if (index == token0) {
             setToken0(token1);
         }
-        setToken1(value);
+        setToken1(index);
         // getTokenExRate();
         await getAllowance();
     }
@@ -241,6 +242,22 @@ export default function Swap() {
         }
     }
 
+    const myModal5ClickHandle = () => {
+        if (modalToken == "") {
+            setModalToken("modal-open");
+        } else {
+            setModalToken("");
+        }
+    }
+
+    const myModal6ClickHandle = () => {
+        if (modalToken1 == "") {
+            setModalToken1("modal-open");
+        } else {
+            setModalToken1("");
+        }
+    }
+
     const openTarget = () => {
         modalClick();
         window.open("https://explorer.hyperlane.xyz/?search=0x14d3bb3aaf175f922f11f2694868c3fad58824e1")
@@ -286,21 +303,21 @@ export default function Swap() {
         const fetchToken0Balance = async () => {
             let token0Info = tokensConfig[networkConfig[currentNetwork].value][token0];
             let token0Balance = await getERC20Balance(token0Info.address);
-            console.log(ethers.utils.formatUnits(String(token0Balance), token0Info.decimals));
+            console.log("fetch balance token0:", ethers.utils.formatUnits(String(token0Balance), token0Info.decimals));
             setToken0Balance(ethers.utils.formatUnits(String(token0Balance), token0Info.decimals));
         }
 
         const fetchToken1Balance = async () => {
             let token1Info = tokensConfig[networkConfig[currentNetwork].value][token1];
             let token1Balance = await getERC20Balance(token1Info.address);
-            console.log(ethers.utils.formatUnits(String(token1Balance), token1Info.decimals));
+            console.log("fetch balance token1:", ethers.utils.formatUnits(String(token1Balance), token1Info.decimals));
             setToken1Balance(ethers.utils.formatUnits(String(token1Balance), token1Info.decimals));
         }
 
-        if (token0) {
+        if (token0 != null) {
             fetchToken0Balance();
         }
-        if (token1) {
+        if (token1 != null) {
             fetchToken1Balance();
         }
 
@@ -345,15 +362,49 @@ export default function Swap() {
                 </div>
             </div>
 
-            {/* <div className="w-32 mx-auto mt-40">
-                <select className="select w-full max-w-xs rounded-2xl select-primary bg-slate-50" onChange={networkChange}>
+            <div className={`modal ${modalToken} cursor-pointer ${styles.modalSelf}`} id="my-modal-5">
+                <div className="modal-box">
+                    <h3 className="text-lg font-bold">Select Token</h3>
+                    <div className="divider"></div>
+                    <div className="flex flex-col">
+                        {tokenlist.map((item, key) => (
+                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" onClick={() => selectToken0ChangeHandle(key)}>
+                                <div className="w-1/12 align-middle">
+                                    <Image src={item.path} width={25} height={25} />
+                                </div>
+                                <div className="w-9/12 mb-4">
+                                    <div>{item.symbol}</div>
+                                </div>
+                                <div className="w-2/12">
+                                    -
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
 
-                    {networkConfig.map((item, key) => (
-                        <option key={key} value={key}>{item.label}</option>
-                    ))}
-
-                </select>
-            </div> */}
+            <div className={`modal ${modalToken1} cursor-pointer ${styles.modalSelf}`} id="my-modal-6">
+                <div className="modal-box">
+                    <h3 className="text-lg font-bold">Select Token</h3>
+                    <div className="divider"></div>
+                    <div className="flex flex-col">
+                        {tokenlist.map((item, key) => (
+                            <div className="flex flex-row h-10 cursor-pointer hover:bg-primary-focus p-2 rounded-2xl" onClick={() => selectToken1ChangeHandle(key)}>
+                                <div className="w-1/12 align-middle">
+                                    <Image src={item.path} width={25} height={25} />
+                                </div>
+                                <div className="w-9/12 mb-4">
+                                    <div>{item.symbol}</div>
+                                </div>
+                                <div className="w-2/12">
+                                    -
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
 
             <div className="w-36 m-auto" onClick={myModal4ClickHandle}>
                 <div className="w-36 mx-auto mt-40 flex flex-row border-solid border-2 rounded-2xl p-2 cursor-pointer">
@@ -384,13 +435,25 @@ export default function Swap() {
                                 <input type="text" placeholder="0.0" onChange={token0InputHandle} onFocus={token0InputHandle} value={token0Input} className="input input-ghost w-full max-w-xs focus:outline-0 focus:bg-inherit" />
                             </div>
                             <div className="w-1/4">
-                                <select className="select select-primary w-full max-w-xs rounded-2xl bg-slate-50" onChange={selectToken0ChangeHandle}>
+
+                                {token0 != null ? (<div className="w-32 mx-auto flex flex-row border-solid border-2 rounded-2xl p-1 cursor-pointer" onClick={myModal5ClickHandle}>
+                                    <div className="m-1"><Image src={tokensConfig[networkConfig[currentNetwork].value][token0].path} width={20} height={20}></Image></div>
+                                    <div className="ml-2 mt-1">{tokensConfig[networkConfig[currentNetwork].value][token0].symbol}</div>
+                                    <div className="ml-2 mt-1"><FaAngleDown size="1.3rem" /></div>
+                                </div>) : (<div className="w-28 h-10 mx-auto flex flex-row border-solid border-2 rounded-2xl p-1 cursor-pointer" onClick={myModal5ClickHandle}>
+                                    <div className="ml-2 mt-1">Select</div>
+                                    <div className="ml-2 mt-1"><FaAngleDown size="1.3rem" /></div>
+                                </div>)}
+
+
+
+                                {/* <select className="select select-primary w-full max-w-xs rounded-2xl bg-slate-50" onChange={selectToken0ChangeHandle}>
                                     <option disabled selected>Pick</option>
                                     {tokenlist.map((item, key) => (
                                         (key == token0) ? <option key={key} data-key={key} selected value={item.address}>{item.symbol}</option> : <option key={key} data-key={key} value={item.address}>{item.symbol}</option>
                                     ))}
 
-                                </select>
+                                </select> */}
                             </div>
                         </div>
 
@@ -410,12 +473,21 @@ export default function Swap() {
                                 <input type="text" placeholder="0.0" onChange={token1InputHandle} onFocus={token1InputHandle} value={token1Input} className="input input-ghost w-full max-w-xs focus:outline-0 focus:bg-inherit" />
                             </div>
                             <div className="w-1/4">
-                                <select className="select select-primary w-full max-w-xs rounded-2xl bg-slate-50" onChange={selectToken1ChangeHandle}>
+                                {token1 != null ? (<div className="w-32 mx-auto flex flex-row border-solid border-2 rounded-2xl p-1 cursor-pointer" onClick={myModal5ClickHandle}>
+                                    <div className="m-1"><Image src={tokensConfig[networkConfig[currentNetwork].value][token1].path} width={20} height={20}></Image></div>
+                                    <div className="ml-2 mt-1">{tokensConfig[networkConfig[currentNetwork].value][token1].symbol}</div>
+                                    <div className="ml-2 mt-1"><FaAngleDown size="1.3rem" /></div>
+                                </div>) : (<div className="w-28 h-10 mx-auto flex flex-row border-solid border-2 rounded-2xl p-1 cursor-pointer" onClick={myModal6ClickHandle}>
+                                    <div className="ml-2 mt-1">Select</div>
+                                    <div className="ml-2 mt-1"><FaAngleDown size="1.3rem" /></div>
+                                </div>)}
+
+                                {/* <select className="select select-primary w-full max-w-xs rounded-2xl bg-slate-50" onChange={selectToken1ChangeHandle}>
                                     <option disabled selected>Pick</option>
                                     {tokenlist.map((item, key) => (
                                         (key == token1) ? <option key={key} data-key={key} selected value={item.address}>{item.symbol}</option> : <option key={key} data-key={key} value={item.address}>{item.symbol}</option>
                                     ))}
-                                </select>
+                                </select> */}
                             </div>
                         </div>
                     </div>
