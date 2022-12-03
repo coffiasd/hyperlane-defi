@@ -70,9 +70,9 @@ npm run dev
 
 ## Reference
 
-Hyperlane Docs:<https://docs.hyperlane.xyz/hyperlane-docs/introduction/readme>
-Uniswap V3 Docs:<https://docs.uniswap.org/sdk/v3/overview>
-Hardhat:<https://hardhat.org/>
+- Hyperlane Docs:<https://docs.hyperlane.xyz/hyperlane-docs/introduction/readme>
+- Uniswap V3 Docs:<https://docs.uniswap.org/sdk/v3/overview>
+- Hardhat:<https://hardhat.org/>
 
 ## License
 
