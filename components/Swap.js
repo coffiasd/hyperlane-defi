@@ -11,7 +11,7 @@ import networkConfig from "../utils/network_config.json";
 import tokensConfig from "../utils/token_config.json";
 import { useEffect, useState } from "react";
 import { FetchPrice } from "../utils/common";
-import HyperABI from '../contract/artifacts/contracts/Hyperswap.sol/Hyperswap.json';
+import HyperABI from '../utils/Hyperswap.json';
 //wagmi hooks
 import { useAccount, useNetwork, erc20ABI, useSwitchNetwork } from 'wagmi'
 //alert
