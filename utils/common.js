@@ -54,7 +54,7 @@ export async function FetchPrice(token0, token1, poolContract, ChainId) {
         state.liquidity.toString(),
         state.tick
     )
-    console.log(pool.token0Price, pool.token0Price.toFixed(4));
+    // console.log(pool.token0Price, pool.token0Price.toFixed(4));
     return pool.token0Price.toFixed(4);
 }
 

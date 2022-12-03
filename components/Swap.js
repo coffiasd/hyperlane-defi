@@ -78,6 +78,8 @@ export default function Swap() {
     const { isConnected } = useAccount();
     const { chain } = useNetwork();
 
+    var myInterval = null;
+
     //alert options
     const options = {
         autoClose: true,
@@ -124,7 +126,7 @@ export default function Swap() {
 
     //get allowance
     async function getAllowance() {
-        if (!token0) {
+        if (token0 == null) {
             return
         }
         //token0 address
@@ -133,8 +135,22 @@ export default function Swap() {
         let erc20 = new ethers.Contract(token0Info.address, erc20ABI, provider);
         console.log("allowance================", networkConfig[currentNetwork].value, token0Info.address);
         let allowance = await erc20.allowance(interchainAccount, uniswapRouterAddress);
-        console.log(token0);
-        setAllowance(Number(allowance._hex));
+        console.log("================allowance2===============", Number(allowance._hex) / Math.pow(10, token0Info.decimals));
+        setAllowance(Number(allowance._hex) / Math.pow(10, token0Info.decimals));
+
+        console.log("myInterval:", myInterval);
+
+        if (Number(allowance._hex) / Math.pow(10, token0Info.decimals) >= token0Input) {
+            setLoading("");
+            console.log("myInterval:", myInterval);
+            clearInterval(myInterval);
+        }
+
+        // setTimeout(() => {
+        //     console.log("allowance timeout");
+        //     setAllowance(1);
+        // }, 4000);
+
     }
 
     //token0 change event.
@@ -186,6 +202,11 @@ export default function Swap() {
 
     // approve
     async function approve() {
+        // setLoading("loading");
+        // myInterval = setInterval(() => {
+        //     getAllowance();
+        // }, 2000);
+        // console.log(myInterval);
         console.log("==================approve================");
         if (!isConnected) {
             alertService.info("connect wallet!!", options);
@@ -197,14 +218,18 @@ export default function Swap() {
             return;
         }
         setLoading("loading");
-        setTimeout(() => {
-            setLoading("");
-        }, 12000);
+        // setTimeout(() => {
+        //     setLoading("");
+        // }, 12000);
         const m = await connectedContract.ApproveSpecifyToken(networkConfig[currentNetwork].value, tokensConfig[networkConfig[currentNetwork].value][token0].address, ethers.utils.parseEther(token0Input), {
             gasLimit: ethers.utils.hexlify(0x100000), //100000
         });
         console.log(m);
-        setLoading("");
+        // setLoading("");
+        myInterval = setInterval(() => {
+            getAllowance();
+        }, 2000);
+        console.log(myInterval);
     }
 
     async function swap() {
@@ -281,7 +306,7 @@ export default function Swap() {
             return <button className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`} onClick={approve} >Approve</button >
         }
 
-        if (token1Input > 0 && token0Input > 0 && token1Input && token0 && token1) {
+        if (token1Input > 0 && token0Input > 0 && token1Input && token0 != null && token1 != null) {
             return <button className={`btn btn-primary w-full normal-case my-5 rounded-xl ${loading}`} onClick={swap}>Swap</button>
         }
 
@@ -453,15 +478,6 @@ export default function Swap() {
                                     <div className="ml-2 mt-1"><FaAngleDown size="1.3rem" /></div>
                                 </div>)}
 
-
-
-                                {/* <select className="select select-primary w-full max-w-xs rounded-2xl bg-slate-50" onChange={selectToken0ChangeHandle}>
-                                    <option disabled selected>Pick</option>
-                                    {tokenlist.map((item, key) => (
-                                        (key == token0) ? <option key={key} data-key={key} selected value={item.address}>{item.symbol}</option> : <option key={key} data-key={key} value={item.address}>{item.symbol}</option>
-                                    ))}
-
-                                </select> */}
                             </div>
                         </div>
 
